@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/widgets/user_image_picker.dart';
 
 class AuthForm extends StatefulWidget {
   AuthForm(this.submitFn, this.isLoading);
 
   final bool isLoading;
-  final void Function(String email, String password, String username, bool isLogin, BuildContext context) submitFn;
+  final void Function(String email, String password, String username, String imageData, bool isLogin, BuildContext context) submitFn;
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -17,10 +18,31 @@ class _AuthFormState extends State<AuthForm> {
   String _userName = '';
   String _userPassword = '';
   String _confirmUserPassword = '';
+  String _imageData = '';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+  }
+
+  void _saveImageData(String base64data){
+    _imageData = base64data;
+  }
 
   void _trySubmit() {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
+
+    if(_imageData == '' && !_isLogin){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Пожалуйста выбирите фотографию.'),
+          backgroundColor: Theme.of(context).errorColor,
+        )
+      );
+      return;
+    }
 
     if (isValid) {
       _formKey.currentState!.save();
@@ -28,6 +50,7 @@ class _AuthFormState extends State<AuthForm> {
           _userEmail.trim(),
           _userPassword.trim(),
           _userName.trim(),
+          _imageData,
           _isLogin,
          context
       );
@@ -46,14 +69,11 @@ class _AuthFormState extends State<AuthForm> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                      _isLogin ? 'Вход в аккаунт' : 'Создание нового аккаунта',
+                  _isLogin ? const Text('Ввойдите в аккаунт',
                     style: TextStyle(
-                      color: Theme.of(context).secondaryHeaderColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)
+                  ) : UserImagePicker(_saveImageData),
                   TextFormField(
                     key: ValueKey('email'),
                     validator: (value) {

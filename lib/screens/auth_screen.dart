@@ -20,6 +20,7 @@ class _AuthScreenState extends State<AuthScreen> {
       String email,
       String password,
       String username,
+      String imageData,
       bool isLogin,
       BuildContext context) async {
     final authResult;
@@ -42,12 +43,17 @@ class _AuthScreenState extends State<AuthScreen> {
       await FirebaseFirestore.instance.collection('users')
           .doc(authResult.user.uid).set({
         'username': username,
-        'email': email
+        'email': email,
+        'chats': ['general'],
+        'image': imageData
       });
       setState(() {
         _isLoading = false;
       });
     } on PlatformException catch (err) {
+      setState(() {
+        _isLoading = false;
+      });
       var message = 'Произошла ошибка, пожалуйста, проверьте свои учетные данные!';
 
       if (err.message != null) {
@@ -66,6 +72,9 @@ class _AuthScreenState extends State<AuthScreen> {
             backgroundColor: Theme.of(context).errorColor,
           ));
     } catch (err) {
+      setState(() {
+        _isLoading = false;
+      });
       print(err);
     }
   }
